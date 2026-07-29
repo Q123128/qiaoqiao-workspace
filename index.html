@@ -805,7 +805,18 @@ const demoData = {
   ],
 };
 
+// 给 fitness 数据补上 url 字段（如果还没配URL，点"开始练"会弹出输入框让你粘贴链接）
+demoData.fitness.forEach(e => { if (!('url' in e)) e.url = ''; });
+
 // ============ UTILS ============
+function openExerciseUrl(idx) {
+  const e = demoData.fitness[idx];
+  const newUrl = prompt('🔗 粘贴视频/文章链接（小红书/B站/抖音均可）：\n\n' + e.title, e.url || '');
+  if (newUrl !== null) {
+    e.url = newUrl.trim();
+    renderFitness();
+  }
+}
 function toggleSidebar() {
   document.getElementById('sidebarLeft').classList.toggle('open');
 }
@@ -855,8 +866,8 @@ function getModuleName(mod) {
 // ============ MODULE 2: FITNESS ============
 function renderFitness() {
   const el = document.getElementById('exerciseList');
-  el.innerHTML = demoData.fitness.map(e => `
-    <div class="exercise-card">
+  el.innerHTML = demoData.fitness.map((e, i) => `
+    <div class="exercise-card" style="cursor:${e.url?'pointer':'default'}" onclick="${e.url ? `window.open('${e.url}','_blank')` : ''}">
       <h4>${e.title}</h4>
       <div class="desc">${e.desc}</div>
       <div class="tags">
@@ -867,8 +878,11 @@ function renderFitness() {
       </div>
       <div class="source">📍 来源：${e.source}</div>
       <div class="actions">
-        <button class="btn-sm green">▶ 开始练</button>
-        <button class="btn-sm outline">📝 拆解文案</button>
+        ${e.url
+          ? `<a href="${e.url}" target="_blank" class="btn-sm green" style="text-decoration:none;display:inline-block;">▶ 开始练</a>`
+          : `<button class="btn-sm green" onclick="openExerciseUrl(${i})">▶ 开始练（需配置链接）</button>`
+        }
+        <button class="btn-sm outline" onclick="event.stopPropagation();alert('拆解功能：\\n标题：${e.title}\\n来源：${e.source}\\n\\n请将目标页面的文案粘贴到此处分析')">📝 拆解文案</button>
       </div>
     </div>
   `).join('');
