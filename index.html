@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>乔乔的个人AI工作台</title>
+<style>
+:root {
+  --green-light: #E8EFE6;
+  --green-mid: #C5D5CB;
+  --green-main: #A8C3A4;
+  --green-dark: #7A9B7A;
+  --bg-warm: #FAF8F3;
+  --text-dark: #2F3E2F;
+  --text-mid: #5A6B5A;
+  --text-light: #8A9A8A;
+  --white: #FFFFFF;
+  --red-badge: #E07B7B;
+  --red: #D96C6C;
+  --orange: #E8A960;
+  --blue: #7BA3C8;
+  --shadow-sm: 0 2px 8px rgba(47,62,47,0.06);
+  --shadow-md: 0 4px 16px rgba(47,62,47,0.10);
+  --shadow-lg: 0 8px 24px rgba(47,62,47,0.12);
+  --radius-card: 18px;
+  --radius-btn: 12px;
+  --radius-sm: 10px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "PingFang SC", "Source Han Sans CN", "Noto Sans SC", "Microsoft YaHei", -apple-system, sans-serif;
+  background: var(--bg-warm);
+  color: var(--text-dark);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+/* iOS Status Bar */
+.status-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 20px;
+  background: var(--bg-warm);
+  font-size: 13px; color: var(--text-mid);
+  border-bottom: 1px solid var(--green-light);
+  position: sticky; top: 0; z-index: 100;
+}
+.status-bar .time { font-weight: 700; font-size: 15px; color: var(--text-dark); }
+.status-bar .right { display: flex; gap: 8px; align-items: center; }
+/* Main Layout */
+.app-container {
+  display: flex; min-height: calc(100vh - 38px); max-width: 1400px; margin: 0 auto;
+}
+/* Left Sidebar */
+.sidebar-left {
+  width: 240px; min-width: 240px;
+  padding: 20px 16px;
+  background: var(--white);
+  border-right: 1px solid var(--green-light);
+  display: flex; flex-direction: column;
+  position: sticky; top: 38px; height: calc(100vh - 38px);
+  overflow-y: auto;
+}
+.personal-card {
+  background: linear-gradient(135deg, var(--green-mid) 0%, var(--green-main) 100%);
+  border-radius: var(--radius-card);
+  padding: 20px 16px;
+  margin-bottom: 16px;
+}
+.personal-card .name {
+  font-size: 22px; font-weight: 800; color: var(--text-dark);
+}
+.personal-card .subtitle {
+  font-size: 13px; color: var(--text-mid); margin-top: 2px;
+}
+.stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;
+}
+.stat-item {
+  background: rgba(255,255,255,0.6);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+}
+.stat-item .num { font-size: 20px; font-weight: 800; color: var(--text-dark); }
+.stat-item .label { font-size: 11px; color: var(--text-mid); margin-top: 2px; }
+/* Navigation */
+.nav-list { list-style: none; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: var(--radius-btn);
+  cursor: pointer; transition: all 0.2s;
+  font-size: 15px; color: var(--text-mid); margin-bottom: 4px;
+}
+.nav-item:hover { background: var(--green-light); color: var(--text-dark); }
+.nav-item.active { background: var(--green-mid); color: var(--text-dark); font-weight: 600; }
+.nav-item .emoji { font-size: 18px; }
+.nav-item .label { flex: 1; }
+.nav-item .badge {
+  background: var(--red-badge); color: white;
+  font-size: 11px; font-weight: 700;
+  min-width: 20px; height: 20px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 6px;
+}
+.sidebar-bottom { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--green-light); }
+.sidebar-bottom .item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: var(--radius-btn);
+  font-size: 14px; color: var(--text-light); cursor: pointer;
+}
+.sidebar-bottom .item:hover { background: var(--green-light); }
+/* Center Content */
+.content-center {
+  flex: 1; padding: 20px 24px; overflow-y: auto;
+  height: calc(100vh - 38px);
+  position: sticky; top: 38px;
+}
+.module-panel { display: none; }
+.module-panel.active { display: block; }
+/* Cards */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.card-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.section-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.section-subtitle { font-size: 14px; color: var(--text-light); margin-bottom: 16px; }
+/* Welcome */
+.welcome { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+.welcome h2 { font-size: 22px; font-weight: 800; }
+.welcome p { font-size: 14px; color: var(--text-light); margin-top: 2px; }
+.btn-ai {
+  background: var(--green-main); color: var(--text-dark);
+  border: none; padding: 10px 18px; border-radius: 20px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: var(--shadow-sm); transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-ai:hover { box-shadow: var(--shadow-md); transform: scale(1.03); }
+.btn-ai:active { transform: scale(0.97); }
+/* Grid */
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+/* Progress Bar */
+.progress-bar {
+  height: 8px; background: var(--green-light);
+  border-radius: 4px; overflow: hidden; margin-top: 6px;
+}
+.progress-bar .fill {
+  height: 100%; background: var(--green-main); border-radius: 4px;
+  transition: width 0.5s ease;
+}
+/* Countdown */
+.countdown-item {
+  margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--green-light);
+}
+.countdown-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.countdown-item .cd-title { font-size: 14px; font-weight: 600; }
+.countdown-item .cd-time {
+  font-size: 13px; color: var(--text-mid); margin-top: 4px;
+}
+.countdown-item .cd-days { font-weight: 800; color: var(--green-dark); font-size: 18px; }
+/* Metric row */
+.metric-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.metric-label { font-size: 13px; color: var(--text-mid); }
+.metric-value { font-size: 18px; font-weight: 700; }
+.metric-value.green { color: var(--green-dark); }
+.metric-value.red { color: var(--red); }
+.metric-value.orange { color: var(--orange); }
+/* Tags */
+.tag {
+  display: inline-block; padding: 3px 10px; border-radius: 10px;
+  font-size: 12px; font-weight: 500; margin-right: 4px; margin-bottom: 4px;
+}
+.tag-green { background: var(--green-light); color: var(--green-dark); }
+.tag-orange { background: #FDF0E0; color: var(--orange); }
+.tag-blue { background: #E0ECF5; color: var(--blue); }
+/* Notification */
+.notif-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0; border-bottom: 1px solid var(--green-light);
+  font-size: 13px;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.notif-type { font-weight: 600; }
+.notif-date { color: var(--text-light); font-size: 12px; margin-left: auto; white-space: nowrap; }
+/* Right AI Panel */
+.sidebar-right {
+  width: 320px; min-width: 320px;
+  padding: 20px 16px;
+  background: var(--white);
+  border-left: 1px solid var(--green-light);
+  display: flex; flex-direction: column;
+  position: sticky; top: 38px; height: calc(100vh - 38px);
+}
+.ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.ai-header h3 { font-size: 18px; font-weight: 800; }
+.ai-status { font-size: 12px; color: var(--green-dark); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.ai-status .dot { width: 8px; height: 8px; background: #4CAF50; border-radius: 50%; }
+.ai-intro {
+  background: var(--green-light); border-radius: var(--radius-card);
+  padding: 14px; font-size: 14px; color: var(--text-mid); margin-bottom: 16px;
+  line-height: 1.5;
+}
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip {
+  background: var(--white);
+  border: 1px solid var(--green-mid);
+  padding: 8px 14px; border-radius: 20px;
+  font-size: 13px; color: var(--text-dark); cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.chip:hover { background: var(--green-mid); box-shadow: var(--shadow-sm); }
+.chip:active { transform: scale(0.96); }
+.ai-chat-area { flex: 1; overflow-y: auto; margin-bottom: 12px; }
+.ai-message {
+  background: var(--green-light); border-radius: 14px;
+  padding: 10px 14px; margin-bottom: 10px; font-size: 14px;
+  max-width: 90%;
+}
+.ai-input-wrap {
+  display: flex; gap: 8px;
+  background: var(--bg-warm); border-radius: var(--radius-btn);
+  padding: 6px; border: 1px solid var(--green-mid);
+}
+.ai-input-wrap input {
+  flex: 1; border: none; background: transparent;
+  padding: 10px 8px; font-size: 14px; outline: none;
+  color: var(--text-dark);
+}
+.ai-input-wrap input::placeholder { color: var(--text-light); }
+.ai-send-btn {
+  background: var(--green-main); color: var(--text-dark);
+  border: none; padding: 10px 18px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.ai-send-btn:hover { background: var(--green-dark); color: white; }
+/* Module specific styles */
+/* Module 2: Fitness */
+.exercise-card {
+  background: var(--white); border-radius: var(--radius-card);
+  padding: 18px; box-shadow: var(--shadow-sm); margin-bottom: 14px;
+}
+.exercise-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.exercise-card .desc { font-size: 13px; color: var(--text-mid); margin-bottom: 10px; }
+.exercise-card .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.exercise-card .source { font-size: 12px; color: var(--text-light); margin-bottom: 12px; }
+.exercise-card .actions { display: flex; gap: 10px; }
+.btn-sm {
+  padding: 8px 16px; border-radius: 10px; border: none; font-size: 13px; cursor: pointer;
+  transition: all 0.2s; font-weight: 600;
+}
+.btn-sm.green { background: var(--green-main); color: var(--text-dark); }
+.btn-sm.outline { background: transparent; border: 1px solid var(--green-mid); color: var(--text-mid); }
+.btn-sm:hover { transform: scale(1.03); box-shadow: var(--shadow-sm); }
+/* Module 3: Social Media */
+.tab-bar {
+  display: flex; gap: 6px; margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 10px 18px; border-radius: 20px; border: 1px solid var(--green-mid);
+  background: var(--white); font-size: 14px; cursor: pointer;
+  transition: all 0.2s; color: var(--text-mid);
+}
+.tab-btn.active { background: var(--green-main); color: var(--text-dark); border-color: var(--green-main); font-weight: 600; }
+.topic-card {
+  background: var(--white); border-radius: var(--radius-card);
+  padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 12px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.topic-num {
+  width: 32px; height: 32px; background: var(--green-mid);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+/* Module 4: Calligraphy */
+.char-display {
+  background: linear-gradient(135deg, var(--bg-warm), var(--green-light));
+  border-radius: var(--radius-card); padding: 40px; text-align: center; margin-bottom: 16px;
+}
+.char-display .big-char { font-size: 80px; font-weight: 900; color: var(--text-dark); }
+.char-display .pinyin { font-size: 16px; color: var(--text-mid); margin-top: 6px; }
+.char-display .meaning { font-size: 14px; color: var(--text-light); margin-top: 4px; }
+.char-display .poem { font-size: 13px; color: var(--text-mid); font-style: italic; margin-top: 10px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-day {
+  width: 100%; aspect-ratio: 1; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; background: var(--green-light); color: var(--text-light);
+}
+.cal-day.checked { background: var(--green-main); color: var(--text-dark); font-weight: 700; }
+.cal-day.today { background: var(--green-dark); color: white; font-weight: 700; }
+/* Module 5: Podcast */
+.podcast-card {
+  background: var(--white); border-radius: var(--radius-card);
+  padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 14px;
+  display: flex; gap: 14px;
+}
+.podcast-rank {
+  width: 36px; height: 36px; background: var(--green-mid);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px; flex-shrink: 0;
+}
+.podcast-info { flex: 1; }
+.podcast-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.podcast-info .meta { font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+.podcast-info .desc { font-size: 13px; color: var(--text-mid); }
+.btn-play {
+  width: 40px; height: 40px; border-radius: 50%; background: var(--green-main);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: all 0.2s; flex-shrink: 0;
+}
+.btn-play:hover { transform: scale(1.1); box-shadow: var(--shadow-md); }
+/* Module 6: Savings */
+.data-strip { display: flex; gap: 16px; margin-bottom: 20px; }
+.data-strip .strip-item {
+  flex: 1; background: var(--white); border-radius: var(--radius-card);
+  padding: 16px; text-align: center; box-shadow: var(--shadow-sm);
+}
+.strip-item .strip-val { font-size: 24px; font-weight: 800; color: var(--green-dark); }
+.strip-item .strip-label { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.savings-goal-card {
+  background: var(--white); border-radius: var(--radius-card);
+  padding: 18px; box-shadow: var(--shadow-sm); margin-bottom: 14px;
+}
+.circle-progress {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: conic-gradient(var(--green-main) 0deg, var(--green-main) 0deg, var(--green-light) 0deg);
+  display: flex; align-items: center; justify-content: center; margin: 10px auto;
+  position: relative;
+}
+.circle-progress::after {
+  content: ''; width: 64px; height: 64px; background: var(--white);
+  border-radius: 50%; position: absolute;
+}
+.circle-progress .pct {
+  position: relative; z-index: 1; font-weight: 800; font-size: 16px; color: var(--text-dark);
+}
+.ledger-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid var(--green-light); font-size: 14px;
+}
+.ledger-item:last-child { border-bottom: none; }
+.ledger-amount.expense { color: var(--red); font-weight: 600; }
+.ledger-amount.income { color: var(--green-dark); font-weight: 600; }
+.fab {
+  position: fixed; bottom: 24px; right: 344px;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--green-main); color: var(--text-dark);
+  border: none; font-size: 24px; font-weight: 700; cursor: pointer;
+  box-shadow: var(--shadow-lg); transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50;
+}
+.fab:hover { transform: scale(1.1); }
+/* Challenge Cards */
+.challenge-card {
+  background: var(--white); border-radius: var(--radius-card);
+  padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 12px;
+}
+.challenge-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.challenge-card .rule { font-size: 13px; color: var(--text-mid); margin-bottom: 8px; }
+/* Tools Grid */
+.tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.tool-card {
+  background: var(--white); border-radius: var(--radius-card);
+  padding: 20px 14px; text-align: center; box-shadow: var(--shadow-sm);
+  cursor: pointer; transition: all 0.2s;
+}
+.tool-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.tool-card .tool-icon { font-size: 32px; margin-bottom: 8px; }
+.tool-card .tool-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.tool-card .tool-desc { font-size: 12px; color: var(--text-light); }
+.tool-card .btn-open {
+  margin-top: 10px; display: inline-block; padding: 6px 18px;
+  background: var(--green-light); border-radius: 10px;
+  font-size: 13px; color: var(--text-dark); border: none; cursor: pointer;
+}
+/* Dropdown */
+.dropdown-wrap { position: relative; display: inline-block; margin-bottom: 16px; }
+.dropdown-btn {
+  padding: 8px 16px; background: var(--white); border: 1px solid var(--green-mid);
+  border-radius: 10px; font-size: 13px; cursor: pointer; color: var(--text-mid);
+}
+.dropdown-menu {
+  display: none; position: absolute; top: 100%; left: 0;
+  background: var(--white); border: 1px solid var(--green-mid);
+  border-radius: 10px; padding: 8px; box-shadow: var(--shadow-md); z-index: 10;
+  min-width: 200px;
+}
+.dropdown-menu.show { display: block; }
+.dropdown-menu .item { padding: 8px 12px; font-size: 13px; cursor: pointer; border-radius: 6px; }
+.dropdown-menu .item:hover { background: var(--green-light); }
+/* Search */
+.search-box {
+  width: 100%; padding: 12px 16px; border: 1px solid var(--green-mid);
+  border-radius: var(--radius-btn); font-size: 14px; outline: none;
+  background: var(--white); color: var(--text-dark); margin-bottom: 16px;
+}
+.search-box::placeholder { color: var(--text-light); }
+/* Skeleton */
+.skeleton { background: linear-gradient(90deg, var(--green-light) 25%, var(--green-mid) 50%, var(--green-light) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--green-mid); border-radius: 2px; }
+/* Hover effects */
+button { cursor: pointer; font-family: inherit; }
+button:active { transform: scale(0.96); }
+/* 成就徽章 */
+.badge-achieve {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; background: var(--green-light);
+  border-radius: 20px; font-size: 13px; margin: 4px;
+}
+.badge-achieve.unlocked { background: var(--green-main); color: var(--text-dark); font-weight: 600; }
+.badge-achieve.locked { opacity: 0.5; }
+/* Category Cards */
+.cat-card {
+  background: var(--white); border-radius: var(--radius-card);
+  padding: 16px; box-shadow: var(--shadow-sm); text-align: center;
+  cursor: pointer; transition: all 0.2s;
+}
+.cat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.cat-card .cat-emoji { font-size: 28px; margin-bottom: 6px; }
+.cat-card .cat-name { font-size: 14px; font-weight: 600; }
+.cat-card .cat-desc { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+/* Date Picker */
+.date-picker { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.date-picker .date-text { font-size: 16px; font-weight: 700; }
+.date-picker .arrow {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--green-light); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+/* Empty State */
+.empty-state {
+  text-align: center; padding: 40px 20px; color: var(--text-light);
+}
+.empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+/* Responsive */
+@media (max-width: 1024px) {
+  .sidebar-right { display: none; }
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .sidebar-left {
+    position: fixed; left: -260px; top: 0; height: 100vh; z-index: 200;
+    transition: left 0.3s; box-shadow: var(--shadow-lg);
+  }
+  .sidebar-left.open { left: 0; }
+  .content-center { padding: 16px 12px; }
+  .card-grid { grid-template-columns: 1fr; }
+  .card-grid-2 { grid-template-columns: 1fr; }
+  .data-strip { flex-direction: column; }
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+  .tab-bar { overflow-x: auto; flex-wrap: nowrap; }
+  .mobile-menu-btn {
+    display: flex; position: fixed; top: 10px; left: 10px; z-index: 150;
+    width: 40px; height: 40px; border-radius: 50%; background: var(--white);
+    border: 1px solid var(--green-mid); align-items: center; justify-content: center;
+    font-size: 18px; box-shadow: var(--shadow-sm); cursor: pointer;
+  }
+  .fab { right: 16px; }
+}
+@media (min-width: 769px) {
+  .mobile-menu-btn { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <span class="time" id="statusTime">⏰ 14:00</span>
+  <span style="font-size:13px;" id="statusDate">7月29日 周三</span>
+  <span class="right">📶 ▂▄▆█ 100% 🔋</span>
+</div>
+
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+<div class="app-container" onclick="closeSidebarOnClick(event)">
+  <!-- Left Sidebar -->
+  <aside class="sidebar-left" id="sidebarLeft">
+    <div class="personal-card">
+      <div class="name">乔乔</div>
+      <div class="subtitle">个人专属AI工作台</div>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="num" id="stat-todo">8</div><div class="label">今日待办</div></div>
+        <div class="stat-item"><div class="num" id="stat-rate">72%</div><div class="label">完成率</div></div>
+        <div class="stat-item"><div class="num" id="stat-streak">15</div><div class="label">连续打卡</div></div>
+        <div class="stat-item"><div class="num" id="stat-output">5</div><div class="label">本周产出</div></div>
+      </div>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchModule('home')"><span class="emoji">🏠</span><span class="label">首页</span><span class="badge">!</span></li>
+      <li class="nav-item" onclick="switchModule('fitness')"><span class="emoji">💪</span><span class="label">减脂塑形管理</span><span class="badge">3</span></li>
+      <li class="nav-item" onclick="switchModule('social')"><span class="emoji">📱</span><span class="label">自媒体运营</span><span class="badge">5</span></li>
+      <li class="nav-item" onclick="switchModule('calligraphy')"><span class="emoji">✍️</span><span class="label">硬笔书法练习</span><span class="badge">1</span></li>
+      <li class="nav-item" onclick="switchModule('podcast')"><span class="emoji">🎧</span><span class="label">播客收听</span><span class="badge">4</span></li>
+      <li class="nav-item" onclick="switchModule('savings')"><span class="emoji">💰</span><span class="label">存钱计划</span><span class="badge">2</span></li>
+      <li class="nav-item" onclick="switchModule('tools')"><span class="emoji">🛠️</span><span class="label">全局通用工具</span></li>
+    </ul>
+    <div class="sidebar-bottom">
+      <div class="item">🔒 锁定 / 面容ID设置</div>
+      <div class="item">☁️ 收起菜单</div>
+    </div>
+  </aside>
+
+  <!-- Center Content -->
+  <main class="content-center" id="contentCenter">
+
+    <!-- Module 1: Home Dashboard -->
+    <div class="module-panel active" id="mod-home">
+      <div class="welcome">
+        <div>
+          <h2>2026年7月29日 周三 · 欢迎回来 👋</h2>
+          <p>今日待办 8 项 · 本周已产出 5 项 · 连续打卡 15 天</p>
+        </div>
+        <button class="btn-ai" onclick="triggerAI('生成本周计划')">⚡ AI生成本周计划</button>
+      </div>
+      <div class="card-grid">
+        <!-- 卡片A -->
+        <div class="card">
+          <div class="card-title">📋 今日综合进度</div>
+          <div class="metric-row"><span class="metric-label">工作待办</span><span class="metric-value">5 / 8</span></div>
+          <div class="progress-bar"><div class="fill" style="width:62%"></div></div>
+          <div class="metric-row" style="margin-top:10px"><span class="metric-label">学习打卡</span><span class="metric-value green">✅ 已完成</span></div>
+          <div class="metric-row"><span class="metric-label">创作任务</span><span class="metric-value">2 篇待写</span></div>
+        </div>
+        <!-- 卡片B -->
+        <div class="card">
+          <div class="card-title">⏳ 重要倒计时</div>
+          <div class="countdown-item">
+            <div class="cd-title">🎯 自媒体年度目标</div>
+            <div class="cd-time">距截止 <span class="cd-days">156</span> 天</div>
+          </div>
+          <div class="countdown-item">
+            <div class="cd-title">✍️ 硬笔书法百日打卡</div>
+            <div class="cd-time">剩余 <span class="cd-days">78</span> 天</div>
+          </div>
+          <div class="countdown-item">
+            <div class="cd-title">💰 存钱目标日</div>
+            <div class="cd-time">剩余 <span class="cd-days">97</span> 天</div>
+          </div>
+        </div>
+        <!-- 卡片C -->
+        <div class="card">
+          <div class="card-title">💪 减脂状态</div>
+          <div class="metric-row"><span class="metric-label">当前体重</span><span class="metric-value">126.5 斤 <span style="font-size:12px;color:var(--text-light)">/ 63.3 kg</span></span></div>
+          <div class="metric-row"><span class="metric-label">已减重</span><span class="metric-value green">-5.2 斤 ↓</span></div>
+          <div class="metric-row"><span class="metric-label">今日热量</span><span class="metric-value">1480 kcal</span></div>
+          <div class="metric-row"><span class="metric-label">热量缺口</span><span class="metric-value green">-320 kcal</span></div>
+        </div>
+        <!-- 卡片D -->
+        <div class="card">
+          <div class="card-title">📱 自媒体运营</div>
+          <div class="metric-row"><span class="metric-label">本月已到账</span><span class="metric-value green">¥3,200</span></div>
+          <div class="metric-row"><span class="metric-label">本月待到账</span><span class="metric-value orange">¥1,800</span></div>
+          <div class="metric-row"><span class="metric-label">进行中合作</span><span class="metric-value">3 单</span></div>
+          <div class="metric-row"><span class="metric-label">待交稿</span><span class="metric-value red">2 篇即将到期</span></div>
+        </div>
+        <!-- 卡片E -->
+        <div class="card">
+          <div class="card-title">✍️ 硬笔书法练习</div>
+          <div class="metric-row"><span class="metric-label">连续打卡</span><span class="metric-value green">22 天</span></div>
+          <div class="metric-row"><span class="metric-label">本月临帖</span><span class="metric-value">18 页</span></div>
+          <div class="metric-row"><span class="metric-label">当前进度</span><span class="metric-value">第 14 课 / 共 32 课</span></div>
+          <div class="metric-row"><span class="metric-label">下一节</span><span class="metric-value" style="font-size:14px">「永」字偏旁部首</span></div>
+        </div>
+        <!-- 卡片F -->
+        <div class="card">
+          <div class="card-title">💰 存钱计划概览 🆕</div>
+          <div class="metric-row"><span class="metric-label">本月已存</span><span class="metric-value green">¥2,400</span></div>
+          <div class="metric-row"><span class="metric-label">月度目标</span><span class="metric-value">¥3,000</span></div>
+          <div class="progress-bar"><div class="fill" style="width:80%"></div></div>
+          <div style="font-size:12px;color:var(--text-light);margin-top:4px;">完成率 80% · 距目标还差 ¥600</div>
+          <div class="metric-row" style="margin-top:8px;"><span class="metric-label">连续存钱</span><span class="metric-value green">18 天</span></div>
+        </div>
+        <!-- 卡片G -->
+        <div class="card">
+          <div class="card-title">🔔 消息提醒</div>
+          <div class="notif-item"><span class="notif-dot"></span><div><span class="notif-type">交稿提醒</span> 自媒体合作稿 · 品牌A</div><span class="notif-date">7/30截止</span></div>
+          <div class="notif-item"><span class="notif-dot"></span><div><span class="notif-type">打卡提醒</span> 硬笔书法今日未打卡</div><span class="notif-date">今天</span></div>
+          <div class="notif-item"><span class="notif-dot"></span><div><span class="notif-type">存钱提醒</span> 7月存钱目标还差 ¥600</div><span class="notif-date">月底前</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Module 2: 减脂塑形管理 -->
+    <div class="module-panel" id="mod-fitness">
+      <div class="section-title">💪 减脂塑形管理</div>
+      <div class="section-subtitle">身体数据追踪 · 运动教程 · 点开直接练</div>
+      <div class="dropdown-wrap">
+        <button class="dropdown-btn" onclick="toggleDropdown('fitDropdown')">📊 查看详细记录 ▾</button>
+        <div class="dropdown-menu" id="fitDropdown">
+          <div class="item">📏 腰围: 72cm | 臀围: 92cm | 大腿围: 52cm</div>
+          <div class="item">📊 体脂率: 26.5% → 目标 22%</div>
+          <div class="item">🏃 本周运动: 4次 | 总时长 180分钟</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="font-size:17px;">🎬 运动教程（爬虫抓取 · 点开直接练）</h3>
+        <button class="btn-ai" style="font-size:13px;">🔄 今日抓取</button>
+      </div>
+      <div id="exerciseList"></div>
+    </div>
+
+    <!-- Module 3: 自媒体运营 -->
+    <div class="module-panel" id="mod-social">
+      <div class="section-title">📱 自媒体���营</div>
+      <div class="section-subtitle">内容选题 · 数��复盘 · 商业变现 · 客户管理</div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchSocialTab('topics')">📝 内容选题</button>
+        <button class="tab-btn" onclick="switchSocialTab('data')">📊 数据复盘</button>
+        <button class="tab-btn" onclick="switchSocialTab('money')">💰 商业变现</button>
+        <button class="tab-btn" onclick="switchSocialTab('clients')">🤝 客户管理</button>
+      </div>
+      <div id="social-tab-content"></div>
+    </div>
+
+    <!-- Module 4: 硬笔书法练习 -->
+    <div class="module-panel" id="mod-calligraphy">
+      <div class="section-title">✍️ 硬笔书法练习</div>
+      <div class="section-subtitle">每日一字 · 临摹打卡 · 成就解锁</div>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+        <span style="background:var(--green-main);padding:8px 16px;border-radius:20px;font-weight:600;font-size:14px;">✅ 今日已打卡</span>
+        <span style="background:var(--green-light);padding:8px 16px;border-radius:20px;font-size:14px;">🔥 连续 22 天</span>
+        <span style="margin-left:auto;display:flex;gap:6px;">
+          <button class="btn-sm green" id="calliStyleKai" onclick="switchCalliStyle('kai')" style="font-size:13px;">楷书</button>
+          <button class="btn-sm outline" id="calliStyleXingKai" onclick="switchCalliStyle('xingkai')" style="font-size:13px;">行楷</button>
+          <button class="btn-sm outline" id="calliStyleXing" onclick="switchCalliStyle('xing')" style="font-size:13px;">行书</button>
+        </span>
+      </div>
+      <div class="char-display" id="charDisplay">
+        <div class="big-char">永</div>
+        <div class="pinyin">yǒng</div>
+        <div class="meaning">永远 · 永久 · 永字八法</div>
+        <div class="poem">「永和九年，岁在癸丑」—— 王羲之《兰亭集序》</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <button class="btn-sm green">📷 上传作业</button>
+        <button class="btn-sm outline">🎨 自由练字</button>
+        <button class="btn-sm outline">📖 查看笔顺</button>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchCalliTab('library')">📚 字帖库</button>
+        <button class="tab-btn" onclick="switchCalliTab('calendar')">📈 打卡日历</button>
+        <button class="tab-btn" onclick="switchCalliTab('achievements')">🏆 成就墙</button>
+      </div>
+      <div id="calli-tab-content"></div>
+    </div>
+
+    <!-- Module 5: 播客收听 -->
+    <div class="module-panel" id="mod-podcast">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div>
+          <div class="section-title">🎧 播客收听</div>
+          <div class="section-subtitle">合规采集小宇宙免费公开播客 · 三大分类 · 文稿收藏 · 碎片化学习</div>
+        </div>
+        <button class="btn-ai" style="font-size:13px;">📥 采集最新播客</button>
+      </div>
+      <div class="card-grid" style="margin-bottom:20px;">
+        <div class="cat-card"><div class="cat-emoji">📚</div><div class="cat-name">自我提升</div><div class="cat-desc">阅读方法·写作训练·思维模型·时间管理</div></div>
+        <div class="cat-card"><div class="cat-emoji">🌱</div><div class="cat-name">个人成长</div><div class="cat-desc">认知升级·副业变现·心理调适·自律系统</div></div>
+        <div class="cat-card"><div class="cat-emoji">🌍</div><div class="cat-name">全网热门泛知识</div><div class="cat-desc">商业洞察·科技趋势·文化读书·社会观察</div></div>
+      </div>
+      <input class="search-box" placeholder="搜索播客标题、主播……">
+      <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+        <span class="tag tag-green">全部</span><span class="tag tag-green">自我提升</span><span class="tag tag-green">个人成长</span><span class="tag tag-green">全网热门</span>
+      </div>
+      <div id="podcastList"></div>
+    </div>
+
+    <!-- Module 6: 存钱计划 -->
+    <div class="module-panel" id="mod-savings">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div>
+          <div class="section-title">💰 存钱计划</div>
+          <div class="section-subtitle">目标驱动 · 日记账本 · AI智能分析 · 坚��就有效果</div>
+        </div>
+        <button class="btn-ai" style="font-size:13px;">📊 查看年度报告</button>
+      </div>
+      <div class="data-strip">
+        <div class="strip-item"><div class="strip-val">¥2,400</div><div class="strip-label">本月已存</div></div>
+        <div class="strip-item"><div class="strip-val">¥3,000</div><div class="strip-label">月度目标</div><div class="progress-bar" style="margin-top:8px;"><div class="fill" style="width:80%"></div></div><div style="font-size:11px;color:var(--text-light);margin-top:2px;">80%</div></div>
+        <div class="strip-item"><div class="strip-val">18天 🔥</div><div class="strip-label">连续存钱</div></div>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchSavingsTab('goals')">📋 存钱目标</button>
+        <button class="tab-btn" onclick="switchSavingsTab('ledger')">📝 每日记账</button>
+        <button class="tab-btn" onclick="switchSavingsTab('analysis')">📊 消费分析</button>
+        <button class="tab-btn" onclick="switchSavingsTab('challenges')">🏆 存钱挑战</button>
+      </div>
+      <div id="savings-tab-content"></div>
+      <button class="fab" onclick="alert('记一笔功能')" title="记一笔">➕</button>
+    </div>
+
+    <!-- Module 7: 全局通用工具 -->
+    <div class="module-panel" id="mod-tools">
+      <div class="section-title">🛠️ 全局通用工具</div>
+      <div class="section-subtitle">跨板块通用小工具 · 一键调用</div>
+      <div class="tools-grid">
+        <div class="tool-card"><div class="tool-icon">🔢</div><div class="tool-name">计算器</div><div class="tool-desc">快速计算数值</div><button class="btn-open">打开</button></div>
+        <div class="tool-card"><div class="tool-icon">📅</div><div class="tool-name">日历</div><div class="tool-desc">查看日程安排</div><button class="btn-open">打开</button></div>
+        <div class="tool-card"><div class="tool-icon">⏰</div><div class="tool-name">番茄钟</div><div class="tool-desc">25分钟专注</div><button class="btn-open">打开</button></div>
+        <div class="tool-card"><div class="tool-icon">📝</div><div class="tool-name">备忘录</div><div class="tool-desc">记录灵感碎片</div><button class="btn-open">打开</button></div>
+        <div class="tool-card"><div class="tool-icon">🎨</div><div class="tool-name">配色板</div><div class="tool-desc">提取配色方案</div><button class="btn-open">打开</button></div>
+        <div class="tool-card"><div class="tool-icon">📊</div><div class="tool-name">数据看板</div><div class="tool-desc">全局数据汇总</div><button class="btn-open">打开</button></div>
+        <div class="tool-card"><div class="tool-icon">🔗</div><div class="tool-name">快捷跳转</div><div class="tool-desc">常用网站直达</div><button class="btn-open">打开</button></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right AI Panel -->
+  <aside class="sidebar-right">
+    <div class="ai-header">
+      <span style="font-size:24px;">✨</span>
+      <div>
+        <h3>乔乔 AI助手</h3>
+        <div class="ai-status"><span class="dot"></span> 在线 · 跨板块联动</div>
+      </div>
+    </div>
+    <div class="ai-intro">
+      你好！我是 乔乔 AI 助手，可以帮你跨板块调用指令、生成内容、联动数据。试试以下快捷指令 👇
+    </div>
+    <div class="chip-group" id="chipGroup">
+      <span class="chip" onclick="triggerAI('生成本周整体时间分配计划')">生成本周时间分配</span>
+      <span class="chip" onclick="triggerAI('生成5组自媒体标题')">生成5组自媒体标题</span>
+      <span class="chip" onclick="triggerAI('抓取今日自媒体热门素材')">抓取热门素材</span>
+      <span class="chip" onclick="triggerAI('分析本周运营效率')">分析运营效率</span>
+      <span class="chip" onclick="triggerAI('调整下周减脂食谱')">调整下周减脂食谱</span>
+      <span class="chip" onclick="triggerAI('推荐今日硬笔练习字帖')">推荐练习字帖</span>
+      <span class="chip" onclick="triggerAI('生成本月存钱计划')">生成本月存钱计划</span>
+      <span class="chip" onclick="triggerAI('分析本月消费结构')">分析消费结构</span>
+    </div>
+    <div class="ai-chat-area" id="aiChatArea">
+      <div class="ai-message">👋 嗨！我是乔乔 AI助手，试试点击上方的快捷指令，或直接输入你的需求～</div>
+    </div>
+    <div class="ai-input-wrap">
+      <input type="text" id="aiInput" placeholder="输入指令，如：生成今日计划……" onkeydown="if(event.key==='Enter')sendAI()">
+      <button class="ai-send-btn" onclick="sendAI()">发送</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ============ DATA STORE ============
+const demoData = {
+  fitness: [
+    { title:'居家无器械全身燃脂', desc:'无需任何器械，20分钟高效燃脂，适合早起空腹练习', time:'20min', diff:'入门', cal:'200', type:'燃脂', source:'小红书爆款' },
+    { title:'帕梅拉10分钟腹肌撕裂', desc:'高强度腹肌训练，核心收紧，配合呼吸节奏', time:'10min', diff:'进阶', cal:'150', type:'燃脂', source:'B站热门' },
+    { title:'晨间瑜伽唤醒流', desc:'轻柔拉伸唤醒身体，改善体态缓解肩颈酸痛', time:'15min', diff:'入门', cal:'80', type:'拉伸', source:'抖音热门' },
+    { title:'Tabata 4分钟碎片燃脂', desc:'超高强度间歇训练，4分钟顶1小时，办公室也能练', time:'4min', diff:'进阶', cal:'120', type:'燃脂', source:'小红书爆款' },
+    { title:'经期舒缓瑜伽', desc:'温和��伸缓解经期不适，改善血液循环', time:'20min', diff:'入门', cal:'60', type:'拉伸', source:'B站热门' },
+    { title:'站立有氧30分钟', desc:'全程站立无需瑜伽垫，燃脂同时训练心肺', time:'30min', diff:'进阶', cal:'280', type:'有氧', source:'抖音热门' },
+  ],
+  socialTopics: [
+    { num:1, title:'#夏季极简穿搭# 3件单品搞定一周通勤', desc:'极简主义+通勤穿搭，小红书热门赛道', tags:'🔥🔥🔥🔥', hot:'爆款' },
+    { num:2, title:'#下班后3小时# 普通人如何利用碎片时间搞钱', desc:'副业变现·时间管理，情绪价值拉满', tags:'🔥🔥🔥🔥🔥', hot:'爆款' },
+    { num:3, title:'#打工人带饭vol.20# 一周减脂便当合集', desc:'减脂餐+省钱，双重话题叠加', tags:'🔥🔥🔥', hot:'热门' },
+    { num:4, title:'#一个人住的第365天# 独居女孩的治愈日常', desc:'独居生活·治愈系，情绪共鸣型内容', tags:'🔥🔥🔥🔥', hot:'爆款' },
+    { num:5, title:'#看完这本书我辞职了# 改变了我的3个认知', desc:'读书分享·认知升级，悬念反转标题', tags:'🔥🔥🔥', hot:'热门' },
+  ],
+  podcast: [
+    { rank:1, title:'如何建立自己的知识管理系统', host:'纵横四海', time:'45min', platform:'小宇宙', desc:'构建个人知识库的实操方法，从信息收集到知识输出一整套流程', hot:5 },
+    { rank:2, title:'AI时代，普通人如何不被淘汰', host:'硅谷101', time:'38min', platform:'小宇宙', desc:'探讨AI对就业市场的影响，以及个人如何利用AI工具提升竞争力', hot:4 },
+    { rank:3, title:'一年读完100本书的阅读方法论', host:'文化有限', time:'52min', platform:'小宇宙', desc:'高效阅读技巧，如何选书、读透、做笔记、内化知识', hot:4 },
+    { rank:4, title:'从0到1做小红书账号的底层逻辑', host:'搞钱女孩', time:'42min', platform:'小宇宙', desc:'拆解小红书平台算法机制和内容创作方法论，博主实战经验分享', hot:5 },
+    { rank:5, title:'学会和焦虑共处：认知行为疗法入门', host:'史蒂夫说', time:'55min', platform:'小宇宙', desc:'CBT疗法的日常应用，用认知重构的方法应对焦虑和压力', hot:3 },
+    { rank:6, title:'巴菲特致股东的信里藏着什么', host:'商业就是这样', time:'30min', platform:'小宇宙', desc:'解读巴菲特投资哲学和商业思维，适合投资初学者', hot:3 },
+  ],
+  savingsGoals: [
+    { name:'🏖 旅行基金', target:8000, saved:3200, date:'2026-12-31', pct:40 },
+    { name:'💻 换电脑', target:12000, saved:7200, date:'2026-10-15', pct:60 },
+    { name:'🏠 首付款', target:50000, saved:18500, date:'2027-06-30', pct:37 },
+  ],
+  ledger: [
+    { icon:'🍜', cat:'餐饮', amount:-32, note:'午餐外卖', time:'12:30' },
+    { icon:'🚇', cat:'交通', amount:-8, note:'地铁通勤', time:'08:15' },
+    { icon:'🛍', cat:'购物', amount:-46.5, note:'日用品', time:'18:20' },
+    { icon:'💰', cat:'收入', amount:100, note:'兼职收入', time:'15:00', isIncome:true },
+    { icon:'🍜', cat:'餐饮', amount:-18, note:'早餐咖啡', time:'07:45' },
+    { icon:'🎬', cat:'娱乐', amount:-35, note:'电影票', time:'20:00' },
+  ],
+  challenges: [
+    { name:'52周存钱挑战', rule:'每周递增存款，第1周10元，第52周520元', progress:'30/52', saved:2340, diff:'中等' },
+    { name:'365天打卡', rule:'每天至少存1元，365天不间断', progress:'200/365', saved:1860, diff:'简单' },
+  ],
+  newChallenges: [
+    { name:'30天不奶茶挑战', rule:'30天内不买奶茶，省下的钱存入旅行基金', diff:'中等' },
+    { name:'每日存10元挑战', rule:'每天固定存10元，培养存钱习惯', diff:'简单' },
+    { name:'周存递增挑战', rule:'每周比上周多存5元，循序渐进', diff:'中等' },
+  ],
+};
+
+// ============ UTILS ============
+function toggleSidebar() {
+  document.getElementById('sidebarLeft').classList.toggle('open');
+}
+function closeSidebarOnClick(e) {
+  if (window.innerWidth <= 768 && !e.target.closest('.sidebar-left') && !e.target.closest('.mobile-menu-btn')) {
+    document.getElementById('sidebarLeft').classList.remove('open');
+  }
+}
+function toggleDropdown(id) {
+  document.getElementById(id).classList.toggle('show');
+  setTimeout(() => {
+    document.addEventListener('click', function closeDd(e) {
+      if (!e.target.closest('.dropdown-wrap')) {
+        document.getElementById(id).classList.remove('show');
+        document.removeEventListener('click', closeDd);
+      }
+    });
+  }, 10);
+}
+
+// ============ MODULE SWITCHING ============
+let currentModule = 'home';
+function switchModule(mod) {
+  currentModule = mod;
+  document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('mod-' + mod).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.includes(getModuleName(mod))) n.classList.add('active');
+  });
+  // Close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebarLeft').classList.remove('open');
+  }
+  // Render dynamic content
+  if (mod === 'fitness') renderFitness();
+  if (mod === 'social') renderSocialTopics();
+  if (mod === 'podcast') renderPodcast();
+  if (mod === 'savings') renderSavingsGoals();
+  if (mod === 'calligraphy') renderCalliLibrary();
+}
+function getModuleName(mod) {
+  const map = { home:'首页', fitness:'减脂塑形', social:'自媒体运营', calligraphy:'硬笔书法', podcast:'播��收听', savings:'存钱计划', tools:'全局通用' };
+  return map[mod] || '';
+}
+
+// ============ MODULE 2: FITNESS ============
+function renderFitness() {
+  const el = document.getElementById('exerciseList');
+  el.innerHTML = demoData.fitness.map(e => `
+    <div class="exercise-card">
+      <h4>${e.title}</h4>
+      <div class="desc">${e.desc}</div>
+      <div class="tags">
+        <span class="tag tag-green">⏱ ${e.time}</span>
+        <span class="tag tag-orange">📊 ${e.diff}</span>
+        <span class="tag tag-green">🔥 ${e.cal}kcal</span>
+        <span class="tag tag-blue">🎯 ${e.type}</span>
+      </div>
+      <div class="source">📍 来源：${e.source}</div>
+      <div class="actions">
+        <button class="btn-sm green">▶ 开始练</button>
+        <button class="btn-sm outline">📝 拆解文案</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============ MODULE 3: SOCIAL ============
+let currentSocialTab = 'topics';
+function switchSocialTab(tab) {
+  currentSocialTab = tab;
+  document.querySelectorAll('#mod-social .tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (tab === 'topics') renderSocialTopics();
+  else if (tab === 'data') renderSocialData();
+  else if (tab === 'money') renderSocialMoney();
+  else if (tab === 'clients') renderSocialClients();
+}
+function renderSocialTopics() {
+  const el = document.getElementById('social-tab-content');
+  el.innerHTML = `
+    <input class="search-box" placeholder="搜索选题关键词、爆款标题……">
+    <div class="card-grid" style="margin-bottom:16px;">
+      <div class="cat-card"><div class="cat-emoji">📈</div><div class="cat-name">热门选题</div><div class="cat-desc">节日热点·季节话题·争议话题</div></div>
+      <div class="cat-card"><div class="cat-emoji">✍️</div><div class="cat-name">爆款标题</div><div class="cat-desc">情绪价值·实用干货·悬念反转</div></div>
+      <div class="cat-card"><div class="cat-emoji">🌍</div><div class="cat-name">平台热点</div><div class="cat-desc">小红书·抖音·视频号·公众号</div></div>
+    </div>
+    ${demoData.socialTopics.map(t => `
+      <div class="topic-card">
+        <div class="topic-num">${t.num}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${t.title}</div>
+          <div style="font-size:13px;color:var(--text-mid);margin-bottom:6px;">${t.desc}</div>
+          <span class="tag tag-green">${t.hot}</span>
+          <span style="font-size:12px;color:var(--text-light);margin-left:6px;">${t.tags}</span>
+          <button class="btn-sm green" style="float:right;">✍️ 生成文案</button>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+function renderSocialData() {
+  document.getElementById('social-tab-content').innerHTML = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">📊 本月数据概览</div>
+      <div class="metric-row"><span class="metric-label">总曝光量</span><span class="metric-value">128,500</span></div>
+      <div class="metric-row"><span class="metric-label">互动率</span><span class="metric-value green">4.2% ↑</span></div>
+      <div class="metric-row"><span class="metric-label">涨粉</span><span class="metric-value green">+1,280</span></div>
+      <div class="metric-row"><span class="metric-label">已发布</span><span class="metric-value">18 篇</span></div>
+    </div>
+  `;
+}
+function renderSocialMoney() {
+  document.getElementById('social-tab-content').innerHTML = `
+    <div class="card">
+      <div class="card-title">💰 商业变现</div>
+      <div class="metric-row"><span class="metric-label">本月总收入</span><span class="metric-value green">¥5,000</span></div>
+      <div class="metric-row"><span class="metric-label">已到账</span><span class="metric-value green">¥3,200</span></div>
+      <div class="metric-row"><span class="metric-label">待到账</span><span class="metric-value orange">¥1,800</span></div>
+      <div class="metric-row"><span class="metric-label">合作品牌</span><span class="metric-value">4 家</span></div>
+    </div>
+  `;
+}
+function renderSocialClients() {
+  document.getElementById('social-tab-content').innerHTML = `
+    <div class="card">
+      <div class="card-title">🤝 客户列表</div>
+      <div style="font-size:14px;color:var(--text-mid);">品牌A · 合作中 · 已交付2/3篇</div>
+      <div style="font-size:14px;color:var(--text-mid);margin-top:8px;">品牌B · 待签约 · 报价确认中</div>
+      <div style="font-size:14px;color:var(--text-mid);margin-top:8px;">品牌C · 已完成 · 本月结款</div>
+    </div>
+  `;
+}
+
+// ============ MODULE 4: CALLIGRAPHY ============
+let calliStyle = 'kai';
+const chars = {
+  kai: { char:'永', pinyin:'yǒng', meaning:'永远 · 永久 · 永字八法', poem:'「永和九年，岁在癸丑」—— 王羲之《兰亭集序》' },
+  xingkai: { char:'静', pinyin:'jìng', meaning:'安静 · 宁静致远', poem:'「静以修身，俭以养德」—— 诸葛亮《诫子书》' },
+  xing: { char:'和', pinyin:'hé', meaning:'和谐 · 平和 · 和为贵', poem:'「礼之用，和为贵」—— 《论语·学而》' },
+};
+function switchCalliStyle(style) {
+  calliStyle = style;
+  document.querySelectorAll('#mod-calligraphy .btn-sm.green, #mod-calligraphy .btn-sm.outline').forEach(b => { b.className = b.className.replace('green','outline'); });
+  const btnId = style==='kai'?'calliStyleKai':style==='xingkai'?'calliStyleXingKai':'calliStyleXing';
+  document.getElementById(btnId).className = 'btn-sm green';
+  const c = chars[style];
+  document.getElementById('charDisplay').innerHTML = `
+    <div class="big-char">${c.char}</div>
+    <div class="pinyin">${c.pinyin}</div>
+    <div class="meaning">${c.meaning}</div>
+    <div class="poem">${c.poem}</div>
+  `;
+}
+let calliTab = 'library';
+function switchCalliTab(tab) {
+  calliTab = tab;
+  document.querySelectorAll('#mod-calligraphy .tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (tab === 'library') renderCalliLibrary();
+  else if (tab === 'calendar') renderCalliCalendar();
+  else if (tab === 'achievements') renderCalliAchievements();
+}
+function renderCalliLibrary() {
+  document.getElementById('calli-tab-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+      <div class="card"><div class="card-title">基本笔画</div><div style="font-size:13px;color:var(--text-mid);">横 · 竖 · 撇 · 捺 · 点 · 提 · 钩 · 折</div></div>
+      <div class="card"><div class="card-title">偏旁部首</div><div style="font-size:13px;color:var(--text-mid);">氵 · 扌 · 忄 · 木 · 火 · 土 · 钅 · 艹</div></div>
+      <div class="card"><div class="card-title">间架结构</div><div style="font-size:13px;color:var(--text-mid);">左右 · 上下 · 包围 · 品字 · 独体</div></div>
+      <div class="card"><div class="card-title">临古帖</div><div style="font-size:13px;color:var(--text-mid);">《灵飞经》《九成宫》《兰亭序》《多宝塔》</div></div>
+    </div>
+  `;
+}
+function renderCalliCalendar() {
+  let html = '<div style="font-size:14px;font-weight:600;margin-bottom:8px;">2026年7月</div><div class="calendar-grid">';
+  const days = ['一','二','三','四','五','六','日'];
+  days.forEach(d => html += `<div style="text-align:center;font-size:12px;color:var(--text-light);padding:4px;">${d}</div>`);
+  for (let i = 1; i <= 31; i++) {
+    let cls = 'cal-day';
+    if (i <= 29) cls += ' checked';
+    if (i === 29) cls += ' today';
+    html += `<div class="${cls}">${i}</div>`;
+  }
+  html += '</div>';
+  document.getElementById('calli-tab-content').innerHTML = html;
+}
+function renderCalliAchievements() {
+  document.getElementById('calli-tab-content').innerHTML = `
+    <div class="card" style="text-align:center;">
+      <div class="badge-achieve unlocked">✅ 连续7天</div>
+      <div class="badge-achieve unlocked">✅ 连续30天</div>
+      <div class="badge-achieve locked">🔒 连续100天（78天后解锁）</div>
+      <div class="badge-achieve unlocked">✅ 单字临摹50次</div>
+    </div>
+  `;
+}
+
+// ============ MODULE 5: PODCAST ============
+function renderPodcast() {
+  document.getElementById('podcastList').innerHTML = demoData.podcast.map(p => `
+    <div class="podcast-card">
+      <div class="podcast-rank">${p.rank}</div>
+      <div class="podcast-info">
+        <h4>${p.title}</h4>
+        <div class="meta">${p.host} · ${p.time} · ${p.platform}</div>
+        <div class="desc">${p.desc}</div>
+        <div style="font-size:12px;color:var(--text-light);margin-top:4px;">${'🔥'.repeat(p.hot)}</div>
+      </div>
+      <button class="btn-play">▶</button>
+    </div>
+  `).join('');
+}
+
+// ============ MODULE 6: SAVINGS ============
+let savingsTab = 'goals';
+function switchSavingsTab(tab) {
+  savingsTab = tab;
+  document.querySelectorAll('#mod-savings .tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const fab = document.querySelector('.fab');
+  if (tab === 'ledger') fab.style.display = 'flex'; else fab.style.display = 'none';
+  if (tab === 'goals') renderSavingsGoals();
+  else if (tab === 'ledger') renderSavingsLedger();
+  else if (tab === 'analysis') renderSavingsAnalysis();
+  else if (tab === 'challenges') renderSavingsChallenges();
+}
+function renderSavingsGoals() {
+  document.getElementById('savings-tab-content').innerHTML = demoData.savingsGoals.map(g => `
+    <div class="savings-goal-card">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="flex:1;">
+          <div style="font-size:16px;font-weight:700;">${g.name}</div>
+          <div style="font-size:13px;color:var(--text-mid);margin-top:4px;">目标 ¥${g.target.toLocaleString()} / 已存 ¥${g.saved.toLocaleString()} / 剩余 ¥${(g.target-g.saved).toLocaleString()}</div>
+          <div style="font-size:12px;color:var(--text-light);margin-top:2px;">预计达成：${g.date}</div>
+          <div style="margin-top:10px;display:flex;gap:8px;">
+            <button class="btn-sm green">+ 存入</button>
+            <button class="btn-sm outline">📋 详情</button>
+          </div>
+        </div>
+        <div class="circle-progress" style="background:conic-gradient(var(--green-main) ${g.pct*3.6}deg, var(--green-light) ${g.pct*3.6}deg);">
+          <span class="pct">${g.pct}%</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function renderSavingsLedger() {
+  document.getElementById('savings-tab-content').innerHTML = `
+    <div class="date-picker">
+      <button class="arrow">◀</button>
+      <span class="date-text">2026年7月29日</span>
+      <button class="arrow">▶</button>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-around;text-align:center;">
+        <div><div style="font-size:13px;color:var(--text-light);">收入</div><div style="font-size:20px;font-weight:700;color:var(--green-dark);">¥100</div></div>
+        <div><div style="font-size:13px;color:var(--text-light);">支出</div><div style="font-size:20px;font-weight:700;color:var(--red);">¥139.50</div></div>
+        <div><div style="font-size:13px;color:var(--text-light);">结余</div><div style="font-size:20px;font-weight:700;color:var(--red);">-¥39.50</div></div>
+      </div>
+    </div>
+    ${demoData.ledger.map(l => `
+      <div class="ledger-item">
+        <span style="font-size:20px;">${l.icon}</span>
+        <span style="flex:1;">${l.cat}<span style="font-size:12px;color:var(--text-light);margin-left:6px;">${l.note}</span></span>
+        <span class="ledger-amount ${l.isIncome?'income':'expense'}">${l.isIncome?'+':''}¥${Math.abs(l.amount)}</span>
+        <span style="font-size:12px;color:var(--text-light);">${l.time}</span>
+        <span style="font-size:12px;color:var(--text-light);cursor:pointer;">✏️</span>
+      </div>
+    `).join('')}
+  `;
+}
+function renderSavingsAnalysis() {
+  document.getElementById('savings-tab-content').innerHTML = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">📊 7月消费结构</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div style="flex:1;min-width:80px;text-align:center;"><div style="font-size:24px;">🍜</div><div style="font-size:12px;">餐饮 38%</div></div>
+        <div style="flex:1;min-width:80px;text-align:center;"><div style="font-size:24px;">🛍</div><div style="font-size:12px;">购物 22%</div></div>
+        <div style="flex:1;min-width:80px;text-align:center;"><div style="font-size:24px;">🚇</div><div style="font-size:12px;">交通 12%</div></div>
+        <div style="flex:1;min-width:80px;text-align:center;"><div style="font-size:24px;">🎬</div><div style="font-size:12px;">娱乐 18%</div></div>
+        <div style="flex:1;min-width:80px;text-align:center;"><div style="font-size:24px;">📌</div><div style="font-size:12px;">固定 10%</div></div>
+      </div>
+      <div style="font-size:14px;color:var(--text-mid);">本月总支出 ¥3,845 · 比上月 ↑ 8.5%</div>
+      <div style="font-size:13px;color:var(--text-light);margin-top:4px;">Top 3: 餐饮 ¥1,461 / 购物 ¥846 / 娱乐 ¥692</div>
+    </div>
+    <div class="card" style="background:var(--green-light);">
+      <div style="font-size:14px;font-weight:600;">💡 AI消费建议</div>
+      <div style="font-size:13px;color:var(--text-mid);margin-top:6px;">本月餐饮占比偏高（38%），建议减少外卖频次至每周3次以内，预计可多存 ¥200/月。娱乐支出可控，继续保持。</div>
+    </div>
+  `;
+}
+function renderSavingsChallenges() {
+  document.getElementById('savings-tab-content').innerHTML = `
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px;">🎯 进行中的挑战</div>
+    ${demoData.challenges.map(c => `
+      <div class="challenge-card">
+        <h4>${c.name}</h4>
+        <div class="rule">${c.rule} · 难度：${c.diff}</div>
+        <div style="font-size:14px;color:var(--text-mid);">进度 ${c.progress} · 已存 ¥${c.saved.toLocaleString()}</div>
+        <div class="progress-bar" style="margin-top:6px;"><div class="fill" style="width:${c.name.includes('52周')?58:55}%"></div></div>
+      </div>
+    `).join('')}
+    <div style="font-size:15px;font-weight:700;margin:16px 0 12px;">🆕 可加入的新挑战</div>
+    ${demoData.newChallenges.map(c => `
+      <div class="challenge-card">
+        <h4>${c.name}</h4>
+        <div class="rule">${c.rule}</div>
+        <span class="tag tag-green">难度：${c.diff}</span>
+        <button class="btn-sm green" style="float:right;">🚀 加入挑战</button>
+      </div>
+    `).join('')}
+  `;
+}
+
+// ============ AI ASSISTANT ============
+function sendAI() {
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  triggerAI(msg);
+  input.value = '';
+}
+function triggerAI(cmd) {
+  const chatArea = document.getElementById('aiChatArea');
+  chatArea.innerHTML += `<div class="ai-message" style="text-align:right;background:transparent;margin-left:auto;color:var(--text-mid);font-size:13px;">${cmd}</div>`;
+  chatArea.innerHTML += `<div class="ai-message" style="margin-top:6px;">🤖 收到！正在处理「${cmd}」……<br><span style="font-size:12px;color:var(--text-light);">（演示模式：此功能需要在后端接入AI服务）</span></div>`;
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+// ============ INIT ============
+function init() {
+  // Set time
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('statusTime').textContent = `⏰ ${h}:${m}`;
+  const weekdays = ['日','一','二','三','四','五','六'];
+  document.getElementById('statusDate').textContent = `${now.getMonth()+1}月${now.getDate()}日 周${weekdays[now.getDay()]}`;
+
+  // Render initial content
+  renderSocialTopics();
+  renderCalliLibrary();
+  renderSavingsGoals();
+  // Hide fab initially
+  document.querySelector('.fab').style.display = 'none';
+}
+init();
+</script>
+</body>
+</html>
